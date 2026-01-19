@@ -7,5 +7,6 @@ def connect_db():
         database=os.getenv("SUPABASE_DB"),
         user=os.getenv("SUPABASE_USER"),
         password=os.getenv("SUPABASE_PASSWORD"),
-        port=5432
+        port=5432,
+        sslmode="require"
     )
