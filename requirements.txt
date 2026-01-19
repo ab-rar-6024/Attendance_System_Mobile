@@ -1,0 +1,6 @@
+flask
+flask-cors
+geocoder
+werkzeug
+gunicorn
+psycopg2-binary

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Attendance Reports{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2>Reports</h2>
+  <p class="text-muted mb-4">Attendance Statistics</p>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm">
+        <h5 class="mb-3">Last 7 Days Attendance</h5>
+        <canvas id="barChart" height="220"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm">
+        <h5 class="mb-3">Present vs Absent (Today)</h5>
+        <canvas id="donutChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const bar = new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ labels | tojson }},
+    datasets: [{
+      label: 'Punch-ins',
+      data: {{ counts | tojson }},
+      backgroundColor: '#007bff'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+const donut = new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Present', 'Absent'],
+    datasets: [{
+      data: [{{ present }}, {{ absent }}],
+      backgroundColor: ['#28a745', '#dc3545']
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Employee Punch History - {{ month }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2>Punch History – {{ month }}</h2>
+  <a href="/admin" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Punch In</th>
+        <th scope="col">Punch Out</th>
+        <th scope="col">Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in history %}
+        <tr>
+          <td>{{ r.date }}</td>
+          <td>{{ r.time_in or "—" }}</td>
+          <td>{{ r.time_out or "—" }}</td>
+          <td>{{ r.location or "—" }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="text-center">No records for this month.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
