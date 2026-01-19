@@ -3,28 +3,18 @@ from functools import wraps
 import random
 import geocoder
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from flask import (
+    Flask, flash, jsonify, redirect, render_template,
+    request, session, url_for
+)
+from flask_cors import CORS
+from werkzeug.security import check_password_hash
 from db import connect_db
 
-app = FastAPI()
-
-# CORS (equivalent of flask-cors)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def root():
-    return {"status": "Attendance API running"}
-
-@app.get("/time")
-def get_time():
-    return {"time": datetime.utcnow()}
+app = Flask(__name__)
+app.secret_key = "super-secret-change-me"
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # ───────────────────────── helpers ─────────────────────────
 def protect(key):
