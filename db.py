@@ -1,13 +1,11 @@
-import psycopg2
 import os
+import psycopg2
 
-def get_db_connection():
+def connect_db():
     return psycopg2.connect(
-        host=os.environ["DB_HOST"],
-        database=os.environ["DB_NAME"],
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"],
-        port=int(os.environ["DB_PORT"]),
-        sslmode="require",
-        connect_timeout=10
+        host="db.oebnbvzxgnsqwyhouqvv.supabase.co",
+        database="postgres",
+        user="postgres",
+        password=os.getenv("SUPABASE_PASSWORD", "Abrar 2005#24"),
+        port=5432
     )
