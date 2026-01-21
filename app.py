@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, time
 from functools import wraps
 import random
 import geocoder
+import pytz
+import os
 
 from flask import (
     Flask, flash, jsonify, redirect, render_template,
@@ -15,6 +17,19 @@ app = Flask(__name__)
 app.secret_key = "super-secret-change-me"
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# ============ ADD THIS SECTION ============
+# Timezone handling
+IST = pytz.timezone('Asia/Kolkata')
+
+def get_ist_now():
+    """Get current time in IST"""
+    return datetime.now(IST)
+
+def get_ist_today():
+    """Get today's date in IST"""
+    return get_ist_now().date()
+# =========================================
 
 # ───────────────────────── helpers ─────────────────────────
 def protect(key):
@@ -516,7 +531,7 @@ def employee_dashboard():
 
 # ───────────────────── punch helper ─────────────────────
 def _record_punch(emp_id: int, punch_type: str, gps_location: dict = None):
-    now = datetime.now()
+    now = get_ist_now()  # NEW - IST timezone
     date = now.date()
     t = now.time()
 
