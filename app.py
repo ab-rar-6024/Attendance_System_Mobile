@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from functools import wraps
 import random
 import geocoder
@@ -40,9 +40,22 @@ def fmt_time(t):
     if not t:
         return None
     if isinstance(t, timedelta):
-        h, m = divmod(int(t.total_seconds()) // 60, 60)
-        return f"{h:02}:{m:02}"
-    return t.strftime("%I:%M %p")
+        # Convert timedelta to hours and minutes
+        total_seconds = int(t.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        # Convert to 12-hour format
+        period = "AM" if hours < 12 else "PM"
+        display_hour = hours % 12
+        if display_hour == 0:
+            display_hour = 12
+        return f"{display_hour:02d}:{minutes:02d} {period}"
+    # Handle datetime.time objects
+    try:
+        return t.strftime("%I:%M %p")
+    except:
+        # Fallback: convert to string and parse
+        return str(t)[:5]  # Just show HH:MM
 
 
 def get_emp_by_pin(pin):
@@ -78,7 +91,24 @@ def dashboard_stats(cur):
             ON a.emp_id = e.id AND a.date = CURRENT_DATE
       ORDER BY e.name
     """)
-    today_rows = cur.fetchall()
+    rows = cur.fetchall()
+    
+    # Format times for template display
+    today_rows = []
+    for r in rows:
+        today_rows.append((
+            r[0],  # id
+            r[1],  # name
+            r[2],  # emp_code
+            r[3],  # pin
+            fmt_time(r[4]) if r[4] else None,  # time_in formatted
+            fmt_time(r[5]) if r[5] else None,  # time_out formatted
+            r[6],  # location_in
+            r[7],  # location_out
+            r[8],  # absent
+            r[9]   # reason
+        ))
+    
     return labels, counts, today_rows
 
 
@@ -463,9 +493,11 @@ def employee_dashboard():
         result = cur.fetchone()
         time_in, time_out = map(fmt_time, result or (None, None))
 
-        cur.execute("SELECT date, COUNT(*) FROM attendance "
-                    "WHERE emp_id=%s AND date >= CURRENT_DATE - INTERVAL '6 days' "
-                    "GROUP BY date ORDER BY date", (emp_id,))
+        cur.execute("""
+            SELECT date, COUNT(*) FROM attendance 
+            WHERE emp_id=%s AND date >= CURRENT_DATE - INTERVAL '6 days'
+            GROUP BY date ORDER BY date
+        """, (emp_id,))
         w = cur.fetchall()
         p_labels = [r[0].strftime("%a") for r in w]
         p_counts = [r[1] for r in w]
